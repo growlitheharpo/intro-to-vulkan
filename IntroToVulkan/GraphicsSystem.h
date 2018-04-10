@@ -5,9 +5,13 @@ class GraphicsSystem
 {
 	private:
 		VkInstance m_vulkanInstance;
+		VkPhysicalDevice m_physicalDevice;
 
 		static VkApplicationInfo generateAppInfo();
 		static VkInstanceCreateInfo generateCreateInfo();
+
+		VkResult createInstance();
+		VkResult initializeDevice();
 
 	public:
 		GraphicsSystem() noexcept;
