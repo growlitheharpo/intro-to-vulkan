@@ -11,5 +11,9 @@ class GraphicsSystem
 
 	public:
 		GraphicsSystem() noexcept;
+
 		VkResult initialize();
+		void cleanup();
+
+		void displayExtensions();
 };

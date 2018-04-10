@@ -1,4 +1,6 @@
 ﻿#include "GraphicsSystem.h"
+#include <vector>
+#include <iostream>
 
 VkApplicationInfo GraphicsSystem::generateAppInfo()
 {
@@ -41,4 +43,24 @@ VkResult GraphicsSystem::initialize()
 	instance_create_info.pApplicationInfo = &app_info;
 
 	return vkCreateInstance(&instance_create_info, nullptr, &m_vulkanInstance);
+}
+
+void GraphicsSystem::cleanup()
+{
+	if (m_vulkanInstance == nullptr)
+		return;
+
+	vkDestroyInstance(m_vulkanInstance, nullptr);
+}
+
+void GraphicsSystem::displayExtensions()
+{
+	uint32_t extension_count = 0;
+	vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
+	std::vector<VkExtensionProperties> extensions(extension_count);
+
+	vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extensions.data());
+	std::cout << "Available extensions: " << std::endl;
+	for (const auto& e : extensions)
+		std::cout << "\t" << e.extensionName << std::endl;
 }

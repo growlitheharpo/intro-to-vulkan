@@ -11,6 +11,7 @@ int main()
 	if (result == VK_SUCCESS)
 	{
 		std::cout << "Success!" << std::endl;
+		graphics.displayExtensions();
 	}
 	else
 	{
