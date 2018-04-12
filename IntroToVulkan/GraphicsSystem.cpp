@@ -1,6 +1,9 @@
 ﻿#include "GraphicsSystem.h"
 #include <vector>
 #include <iostream>
+#include <array>
+
+std::array<const char*, 2> required_extensions = { "VK_KHR_surface", "VK_KHR_win32_surface" };
 
 VkApplicationInfo GraphicsSystem::generateAppInfo()
 {
@@ -22,9 +25,9 @@ VkInstanceCreateInfo GraphicsSystem::generateCreateInfo()
 	instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	instance_create_info.pNext = nullptr;
 	instance_create_info.enabledLayerCount = 0;
-	instance_create_info.enabledExtensionCount = 0;
+	instance_create_info.enabledExtensionCount = required_extensions.size();
 	instance_create_info.flags = 0;
-	instance_create_info.ppEnabledExtensionNames = nullptr;
+	instance_create_info.ppEnabledExtensionNames = required_extensions.data();
 	instance_create_info.ppEnabledLayerNames = nullptr;
 	instance_create_info.pApplicationInfo = nullptr;
 	return instance_create_info;
@@ -32,6 +35,9 @@ VkInstanceCreateInfo GraphicsSystem::generateCreateInfo()
 
 VkResult GraphicsSystem::createInstance()
 {
+	if (!verifyExtensions())
+		return VK_ERROR_INITIALIZATION_FAILED;
+
 	VkApplicationInfo app_info = generateAppInfo();
 	VkInstanceCreateInfo instance_create_info = generateCreateInfo();
 
@@ -39,45 +45,8 @@ VkResult GraphicsSystem::createInstance()
 	return vkCreateInstance(&instance_create_info, nullptr, &m_vulkanInstance);
 }
 
-bool isDeviceSuitable(VkPhysicalDevice d)
-{
-	VkPhysicalDeviceProperties deviceProps;
-	VkPhysicalDeviceFeatures deviceFeatures;
-	vkGetPhysicalDeviceProperties(d, &deviceProps);
-	vkGetPhysicalDeviceFeatures(d, &deviceFeatures);
-
-	return deviceProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU 
-		&& deviceFeatures.geometryShader;
-}
-
-VkResult GraphicsSystem::initializeDevice()
-{
-	uint32_t device_count = 0;
-	vkEnumeratePhysicalDevices(m_vulkanInstance, &device_count, nullptr);
-
-	if (device_count == 0)
-		return VK_ERROR_INITIALIZATION_FAILED;
-
-	std::vector<VkPhysicalDevice> devices(device_count);
-	vkEnumeratePhysicalDevices(m_vulkanInstance, &device_count, devices.data());
-
-	for (const auto& device : devices)
-	{
-		if (isDeviceSuitable(device))
-		{
-			m_physicalDevice = device;
-			break;
-		}
-	}
-
-	if (device_count == 0 || m_physicalDevice == nullptr)
-		return VK_ERROR_INITIALIZATION_FAILED;
-
-	return VK_SUCCESS;
-}
-
 GraphicsSystem::GraphicsSystem() noexcept
-	: m_vulkanInstance(nullptr), m_physicalDevice(nullptr)
+	: m_vulkanInstance(nullptr)
 {
 }
 
@@ -87,7 +56,7 @@ VkResult GraphicsSystem::initialize()
 	if (r != VK_SUCCESS)
 		return r;
 
-	r = initializeDevice();
+	r = m_graphicsDevice.initialize(*this);
 	return r;
 }
 
@@ -99,14 +68,36 @@ void GraphicsSystem::cleanup()
 	vkDestroyInstance(m_vulkanInstance, nullptr);
 }
 
-void GraphicsSystem::displayExtensions()
+bool GraphicsSystem::verifyExtensions() const
 {
 	uint32_t extension_count = 0;
 	vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
-	std::vector<VkExtensionProperties> extensions(extension_count);
 
+	std::vector<VkExtensionProperties> extensions(extension_count);
 	vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extensions.data());
+
+	uint8_t found = 0;
+
 	std::cout << "Available extensions: " << std::endl;
-	for (const auto& e : extensions)
-		std::cout << "\t" << e.extensionName << std::endl;
+	for (uint32_t i = 0; i < extension_count; ++i)
+	{
+		std::cout << "\t" << extensions[i].extensionName << std::endl;
+		
+		for (auto const& required_extension : required_extensions)
+		{
+			if (strcmp(required_extension, extensions[i].extensionName) == 0)
+				++found;
+		}
+	}
+
+	if (found == required_extensions.size())
+	{
+		std::cout << "All required extensions found." << std::endl;
+		return true;
+	}
+	else
+	{
+		std::cout << "WARNING: Could not locate all extensions." << std::endl;
+		return false;
+	}
 }
