@@ -25,7 +25,7 @@ VkInstanceCreateInfo GraphicsSystem::generateCreateInfo()
 	instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	instance_create_info.pNext = nullptr;
 	instance_create_info.enabledLayerCount = 0;
-	instance_create_info.enabledExtensionCount = required_extensions.size();
+	instance_create_info.enabledExtensionCount = static_cast<uint32_t>(required_extensions.size());
 	instance_create_info.flags = 0;
 	instance_create_info.ppEnabledExtensionNames = required_extensions.data();
 	instance_create_info.ppEnabledLayerNames = nullptr;
@@ -57,6 +57,17 @@ VkResult GraphicsSystem::initialize()
 		return r;
 
 	r = m_graphicsDevice.initialize(*this);
+	if (r != VK_SUCCESS)
+		return r;
+
+	r = m_graphicsWindow.initialize();
+	if (r != VK_SUCCESS)
+		return r;
+
+	r = m_drawSurface.initialize(*this, m_graphicsWindow);
+	if (r != VK_SUCCESS)
+		return r;
+
 	return r;
 }
 
@@ -65,6 +76,8 @@ void GraphicsSystem::cleanup()
 	if (m_vulkanInstance == nullptr)
 		return;
 
+	m_graphicsWindow.cleanup();
+	m_graphicsDevice.cleanup();
 	vkDestroyInstance(m_vulkanInstance, nullptr);
 }
 

@@ -1,4 +1,4 @@
-#include <SDL.h>
+#define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.h>
 #include <iostream>
 #include "GraphicsSystem.h"
@@ -21,11 +21,5 @@ int main(int argc, char *args[])
 		std::cout << "Error code: " << result << "." << std::endl;
 	}
 
-	// SDL initialization (move to the graphics system later)
-	SDL_Init(SDL_INIT_VIDEO);
-	SDL_Window* main_window = SDL_CreateWindow("Setup Window", 0, 0, 640, 480, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-	SDL_DestroyWindow(main_window);
-	SDL_Quit();
-	
 	return 0;
 }

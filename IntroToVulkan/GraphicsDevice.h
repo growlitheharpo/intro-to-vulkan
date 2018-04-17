@@ -3,6 +3,9 @@
 
 class GraphicsSystem;
 
+/**
+ * \brief Class that represents a graphics device (i.e., a graphics card)
+ */
 class GraphicsDevice
 {
 private:

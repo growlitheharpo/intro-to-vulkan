@@ -134,12 +134,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsDevice.cpp" />
+    <ClCompile Include="GraphicsSurface.cpp" />
     <ClCompile Include="GraphicsSystem.cpp" />
+    <ClCompile Include="GraphicsWindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GraphicsDevice.h" />
+    <ClInclude Include="GraphicsSurface.h" />
     <ClInclude Include="GraphicsSystem.h" />
+    <ClInclude Include="GraphicsWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
