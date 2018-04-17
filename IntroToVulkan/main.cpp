@@ -3,11 +3,18 @@
 #include <iostream>
 #include "GraphicsSystem.h"
 
+// *****************************************
+//
+// Vulkan is installed by following this link: 
+// https://vulkan.lunarg.com/sdk/home#windows
+//
+// *****************************************
+
 #pragma comment(lib, "vulkan-1.lib")
 #pragma comment(lib, "SDL2main.lib")
 #pragma comment(lib, "SDL2.lib")
 
-int main(int argc, char *args[])
+int main(int , char *[])
 {
 	GraphicsSystem graphics;
 	const VkResult result = graphics.initialize();
@@ -21,5 +28,14 @@ int main(int argc, char *args[])
 		std::cout << "Error code: " << result << "." << std::endl;
 	}
 
+	SDL_Event test;
+	while (true)
+	{
+		SDL_PollEvent(&test);
+		if (test.type == SDL_QUIT)
+			break;
+	}
+
+	graphics.cleanup();
 	return 0;
 }

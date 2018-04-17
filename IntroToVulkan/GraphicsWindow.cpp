@@ -14,7 +14,7 @@ GraphicsWindow::~GraphicsWindow()
 VkResult GraphicsWindow::initialize()
 {
 	SDL_Init(SDL_INIT_VIDEO);
-	m_window = SDL_CreateWindow("Setup Window", 0, 0, 640, 480, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+	m_window = SDL_CreateWindow("Setup Window", 64, 64, 640, 480, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
 	if (m_window == nullptr)
 		return VK_ERROR_INITIALIZATION_FAILED;

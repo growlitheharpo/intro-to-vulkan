@@ -16,8 +16,21 @@ class GraphicsSystem
 		GraphicsSurface m_drawSurface;
 
 		VkResult createInstance();
-		bool verifyExtensions() const;
+		VkResult setupDebugCallback();
 
+		VkDebugReportCallbackEXT m_debugCallback;
+		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+			VkDebugReportFlagsEXT flags,
+			VkDebugReportObjectTypeEXT objType,
+			uint64_t obj,
+			size_t location,
+			int32_t code,
+			const char* layerPrefix,
+			const char* msg,
+			void* userData);
+		
+		static bool verifyExtensions();
+		static bool verifyValidation();
 		static VkApplicationInfo generateAppInfo();
 		static VkInstanceCreateInfo generateCreateInfo();
 

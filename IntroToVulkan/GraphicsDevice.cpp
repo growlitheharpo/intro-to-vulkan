@@ -53,5 +53,4 @@ VkResult GraphicsDevice::initialize(GraphicsSystem& system)
 
 void GraphicsDevice::cleanup()
 {
-
 }
