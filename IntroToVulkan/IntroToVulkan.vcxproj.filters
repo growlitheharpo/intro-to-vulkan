@@ -47,8 +47,5 @@
     <ClInclude Include="GraphicsSurface.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="DEBUG_LOG.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
