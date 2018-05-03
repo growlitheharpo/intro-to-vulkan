@@ -32,22 +32,22 @@ VkInstanceCreateInfo GraphicsSystem::generateCreateInfo()
 	VkInstanceCreateInfo instance_create_info;
 	instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	instance_create_info.pNext = nullptr;
+	instance_create_info.flags = 0;
+	instance_create_info.pApplicationInfo = nullptr;
 
 	if (ENABLE_VALIDATION)
 	{
 		instance_create_info.enabledLayerCount = static_cast<uint32_t>(required_validation.size());
 		instance_create_info.ppEnabledLayerNames = required_validation.data();
 	}
-	else
+	else 
 	{
 		instance_create_info.enabledLayerCount = 0;
 		instance_create_info.ppEnabledLayerNames = nullptr;
 	}
 
 	instance_create_info.enabledExtensionCount = static_cast<uint32_t>(g_required_extensions.size());
-	instance_create_info.flags = 0;
 	instance_create_info.ppEnabledExtensionNames = g_required_extensions.data();
-	instance_create_info.pApplicationInfo = nullptr;
 	return instance_create_info;
 }
 
@@ -74,17 +74,16 @@ VkResult GraphicsSystem::setupDebugCallback()
 	createInfo.pfnCallback = debugCallback;
 	
 	// ReSharper disable once CppLocalVariableMayBeConst
-	PFN_vkCreateDebugReportCallbackEXT func = reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>(vkGetInstanceProcAddr(
-		m_vulkanInstance, "vkCreateDebugReportCallbackEXT"));
+	auto func = reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>(vkGetInstanceProcAddr(m_vulkanInstance, "vkCreateDebugReportCallbackEXT"));
 
 	if (func == nullptr)
 		return VK_ERROR_EXTENSION_NOT_PRESENT;
-	else
-		return func(m_vulkanInstance, &createInfo, nullptr, &m_debugCallback);
+	
+	return func(m_vulkanInstance, &createInfo, nullptr, m_debugCallback);
 }
 
-VkBool32 GraphicsSystem::debugCallback(VkDebugReportFlagsEXT , VkDebugReportObjectTypeEXT , uint64_t ,
-	size_t , int32_t , const char* , const char* msg, void* )
+
+VkBool32 GraphicsSystem::debugCallback(VkDebugReportFlagsEXT, VkDebugReportObjectTypeEXT, uint64_t, size_t, int32_t, const char*, const char* msg, void*)
 {
 	DEBUG_LOG_CONTINUOUS("Validation Layer Says: ");
 	DEBUG_LOG(msg);
@@ -133,7 +132,18 @@ void GraphicsSystem::cleanup()
 	m_drawSurface.cleanup(*this);
 	m_graphicsWindow.cleanup();
 	m_graphicsDevice.cleanup();
+
+	if (ENABLE_VALIDATION)
+		cleanupDebugCallback();
+
 	vkDestroyInstance(m_vulkanInstance, nullptr);
+}
+
+void GraphicsSystem::cleanupDebugCallback()
+{
+	const auto func = reinterpret_cast<PFN_vkDestroyDebugReportCallbackEXT>(vkGetInstanceProcAddr(m_vulkanInstance, "vkDestroyDebugReportCallbackEXT"));
+	if (func != nullptr)
+		func(m_vulkanInstance, *m_debugCallback, nullptr);
 }
 
 bool GraphicsSystem::verifyExtensions()

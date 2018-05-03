@@ -18,17 +18,19 @@ class GraphicsSystem
 		VkResult createInstance();
 		VkResult setupDebugCallback();
 
-		VkDebugReportCallbackEXT m_debugCallback;
+		void cleanupDebugCallback();
+
+		VkDebugReportCallbackEXT m_debugCallback[1];
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 			VkDebugReportFlagsEXT flags,
-			VkDebugReportObjectTypeEXT objType,
+			VkDebugReportObjectTypeEXT obj_type,
 			uint64_t obj,
 			size_t location,
 			int32_t code,
-			const char* layerPrefix,
+			const char* layer_prefix,
 			const char* msg,
-			void* userData);
-		
+			void* user_data);
+
 		static bool verifyExtensions();
 		static bool verifyValidation();
 		static VkApplicationInfo generateAppInfo();

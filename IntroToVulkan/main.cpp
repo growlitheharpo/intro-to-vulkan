@@ -37,5 +37,9 @@ int main(int , char *[])
 	}
 
 	graphics.cleanup();
+
+	std::cout << "break";
+	std::cin.get();
+
 	return 0;
 }
