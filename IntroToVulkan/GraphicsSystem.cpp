@@ -3,16 +3,6 @@
 #include <array>
 #include "DEBUG_LOG.h"
 
-std::array<const char*, 1> required_validation = { "VK_LAYER_LUNARG_standard_validation" };
-
-#if NDEBUG
-	const bool ENABLE_VALIDATION = false;
-	std::array<const char*, 2> required_extensions = { "VK_KHR_surface", "VK_KHR_win32_surface" };
-#else
-	const bool ENABLE_VALIDATION = true;
-	std::array<const char*, 3> g_required_extensions = { "VK_KHR_surface", "VK_KHR_win32_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
-#endif
-
 VkApplicationInfo GraphicsSystem::generateAppInfo()
 {
 	VkApplicationInfo app_info;

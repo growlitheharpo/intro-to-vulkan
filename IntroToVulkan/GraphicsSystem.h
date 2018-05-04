@@ -3,11 +3,22 @@
 #include "GraphicsDevice.h"
 #include "GraphicsWindow.h"
 #include "GraphicsSurface.h"
+#include <array>
 
 class GraphicsSystem
 {
 	friend class GraphicsDevice;
 	friend class GraphicsSurface;
+
+	static constexpr std::array<const char*, 1> required_validation = { "VK_LAYER_LUNARG_standard_validation" };
+
+#if NDEBUG
+	static const bool ENABLE_VALIDATION = false;
+	static constexpr std::array<const char*, 2> required_extensions = { "VK_KHR_surface", "VK_KHR_win32_surface" };
+#else
+	static const bool ENABLE_VALIDATION = true;
+	static constexpr std::array<const char*, 3> g_required_extensions = { "VK_KHR_surface", "VK_KHR_win32_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
+#endif
 
 	private:
 		VkInstance m_vulkanInstance;
