@@ -11,10 +11,12 @@ class GraphicsDevice
 private:
 	VkPhysicalDevice m_physicalDevice;
 	VkDevice m_virtualDevice;
-	int m_graphicsFamilyQueue;
+	VkQueue m_graphicsQueue, m_presentQueue;
+
+	int m_graphicsFamilyQueue, m_presentationFamilyQueue;
 
 	void grabPhysicalDevice(GraphicsSystem& system);
-	void findQueueFamilies();
+	void findQueueFamilies(GraphicsSystem& system);
 	VkResult createVirtualDevice(GraphicsSystem& system);
 
 public:
@@ -24,7 +26,7 @@ public:
 	VkResult initialize(GraphicsSystem& system);
 	void cleanup();
 
-	bool hasQueues() const { return m_graphicsFamilyQueue >= 0; }
+	bool hasQueues() const { return m_graphicsFamilyQueue >= 0 && m_presentationFamilyQueue >= 0; }
 
 	VkPhysicalDevice const& getDevice() const { return m_physicalDevice; }
 };

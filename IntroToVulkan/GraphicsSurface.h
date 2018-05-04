@@ -7,6 +7,8 @@ class GraphicsSystem;
 class GraphicsSurface
 {
 private:
+	friend class GraphicsDevice;
+
 	VkSurfaceKHR m_surface;
 
 public:

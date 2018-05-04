@@ -99,15 +99,15 @@ VkResult GraphicsSystem::initialize()
 			return r;
 	}
 
-	r = m_graphicsDevice.initialize(*this);
-	if (r != VK_SUCCESS)
-		return r;
-
 	r = m_graphicsWindow.initialize();
 	if (r != VK_SUCCESS)
 		return r;
 
 	r = m_drawSurface.initialize(*this, m_graphicsWindow);
+	if (r != VK_SUCCESS)
+		return r;
+
+	r = m_graphicsDevice.initialize(*this);
 	if (r != VK_SUCCESS)
 		return r;
 
