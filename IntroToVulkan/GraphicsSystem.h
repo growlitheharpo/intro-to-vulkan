@@ -20,6 +20,8 @@ class GraphicsSystem
 	static constexpr std::array<const char*, 3> g_required_extensions = { "VK_KHR_surface", "VK_KHR_win32_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
 #endif
 
+	static constexpr  std::array<const char*, 1> g_required_device_extensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
 	private:
 		VkInstance m_vulkanInstance;
 		GraphicsDevice m_graphicsDevice;

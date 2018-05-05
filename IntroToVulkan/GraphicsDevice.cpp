@@ -10,12 +10,34 @@ bool GraphicsDevice::isDeviceSuitable(VkPhysicalDevice d, GraphicsSystem& system
 	vkGetPhysicalDeviceProperties(d, &deviceProps);
 	vkGetPhysicalDeviceFeatures(d, &deviceFeatures);
 
+	// TODO: Support integrated GPU
+	
+	// Not suitable if it's not a discrete GPU
+	if (deviceProps.deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+		return false;
+
+	// Not suitable if it doesn't support geometry shaders
+	if (!deviceFeatures.geometryShader)
+		return false;
+
+	// Not suitable if it doesn't have all the necessary queue families
 	QueueFamilyIndicies indicies;
 	indicies.populate(d, system);
+	if (!indicies.isComplete())
+		return false;
 
-	return deviceProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
-		&& deviceFeatures.geometryShader
-		&& indicies.isComplete();
+	// Not supported if it doesn't have all the extensions necessary
+	uint32_t count = 0;
+	vkEnumerateDeviceExtensionProperties(d, nullptr, &count, nullptr);
+
+	std::vector<VkExtensionProperties> available_extensions(count);
+	vkEnumerateDeviceExtensionProperties(d, nullptr, &count, available_extensions.data());
+	std::set<std::string> required_extensions(GraphicsSystem::g_required_device_extensions.begin(), GraphicsSystem::g_required_device_extensions.end());
+
+	for (const auto& e : available_extensions)
+		required_extensions.erase(e.extensionName);
+
+	return required_extensions.empty();
 }
 
 void GraphicsDevice::QueueFamilyIndicies::populate(VkPhysicalDevice device, GraphicsSystem& system)
@@ -28,18 +50,18 @@ void GraphicsDevice::QueueFamilyIndicies::populate(VkPhysicalDevice device, Grap
 
 	const VkSurfaceKHR draw_surface = system.m_drawSurface.m_surface;
 
-	for (size_t i = 0; i < queueFamilies.size(); ++i)
+	for (uint32_t i = 0; i < queueFamilies.size(); ++i)
 	{
 		if (queueFamilies[i].queueCount > 0 && queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
 		{
-			m_graphics = i;
+			m_graphics = static_cast<int>(i);
 		}
 
 		VkBool32 presentationSupport = false;
 		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, draw_surface, &presentationSupport);
 		if (queueFamilies[i].queueCount > 0 && presentationSupport)
 		{
-			m_present = i;
+			m_present = static_cast<int>(i);
 		}
 
 		if (isComplete())
@@ -98,11 +120,9 @@ VkResult GraphicsDevice::createVirtualDevice(GraphicsSystem& system)
 
 	// Fill the device create info
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	createInfo.pQueueCreateInfos = queueCreateInfos.data();
 	createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
-	createInfo.pEnabledFeatures = &deviceFeatures;
+	createInfo.pQueueCreateInfos = queueCreateInfos.data();
 
-	createInfo.enabledExtensionCount = 0;
 	if (GraphicsSystem::ENABLE_VALIDATION)
 	{
 		createInfo.enabledLayerCount = static_cast<uint32_t>(GraphicsSystem::required_validation.size());
@@ -112,6 +132,10 @@ VkResult GraphicsDevice::createVirtualDevice(GraphicsSystem& system)
 	{
 		createInfo.enabledLayerCount = 0;
 	}
+
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(GraphicsSystem::g_required_device_extensions.size());
+	createInfo.ppEnabledExtensionNames = GraphicsSystem::g_required_device_extensions.data();
+	createInfo.pEnabledFeatures = &deviceFeatures;
 
 	return vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_virtualDevice);
 }
