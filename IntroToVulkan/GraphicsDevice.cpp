@@ -32,12 +32,19 @@ bool GraphicsDevice::isDeviceSuitable(VkPhysicalDevice d, GraphicsSystem& system
 
 	std::vector<VkExtensionProperties> available_extensions(count);
 	vkEnumerateDeviceExtensionProperties(d, nullptr, &count, available_extensions.data());
-	std::set<std::string> required_extensions(GraphicsSystem::g_required_device_extensions.begin(), GraphicsSystem::g_required_device_extensions.end());
+	std::set<std::string> remaining_extensions(GraphicsSystem::g_required_device_extensions.begin(), GraphicsSystem::g_required_device_extensions.end());
 
 	for (const auto& e : available_extensions)
-		required_extensions.erase(e.extensionName);
+		remaining_extensions.erase(e.extensionName);
 
-	return required_extensions.empty();
+	if (!remaining_extensions.empty())
+		return false;
+
+	// Ensure that the swap chain support is sufficient
+	SwapChainSupportDetails details;
+	details.populate(d, system);
+	
+	return !details.m_formats.empty() && !details.m_presentModes.empty();
 }
 
 void GraphicsDevice::QueueFamilyIndicies::populate(VkPhysicalDevice device, GraphicsSystem& system)
@@ -66,6 +73,28 @@ void GraphicsDevice::QueueFamilyIndicies::populate(VkPhysicalDevice device, Grap
 
 		if (isComplete())
 			break;
+	}
+}
+
+void GraphicsDevice::SwapChainSupportDetails::populate(VkPhysicalDevice device, GraphicsSystem& system)
+{
+	VkSurfaceKHR surface = system.m_drawSurface.m_surface;
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &this->m_capabilities);
+
+	uint32_t count;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &count, nullptr);
+	if (count > 0)
+	{
+		this->m_formats.resize(count);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &count, this->m_formats.data());
+	}
+
+	count = 0;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &count, nullptr);
+	if (count > 0)
+	{
+		this->m_presentModes.resize(count);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &count, this->m_presentModes.data());
 	}
 }
 

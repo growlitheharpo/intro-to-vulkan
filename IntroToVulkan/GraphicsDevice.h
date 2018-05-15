@@ -1,5 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.h>
+#include <vector>
 
 class GraphicsSystem;
 
@@ -18,6 +19,15 @@ private:
 		void populate(VkPhysicalDevice device, GraphicsSystem& system);
 		bool isComplete() const { return m_graphics >= 0 && m_present >= 0; }
 		void reset() { m_graphics = -1; m_present = -1; }
+	};
+
+	struct SwapChainSupportDetails
+	{
+		VkSurfaceCapabilitiesKHR m_capabilities;
+		std::vector<VkSurfaceFormatKHR> m_formats;
+		std::vector<VkPresentModeKHR> m_presentModes;
+
+		void populate(VkPhysicalDevice device, GraphicsSystem& system);
 	};
 
 	VkPhysicalDevice m_physicalDevice;
